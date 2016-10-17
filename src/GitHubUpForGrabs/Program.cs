@@ -55,7 +55,7 @@ namespace GitHubUpForGrabs
         private static GitHubClient CreateGitHubClient()
         {
             var client = new GitHubClient(new ProductHeaderValue("GitHubUpForGrabs"));
-            client.Credentials = new Credentials("a9a646e25be5d45decb58bd810e8d0aafa0baf37");
+            client.Credentials = new Credentials("TOKEN");
             return client;
         }
 
