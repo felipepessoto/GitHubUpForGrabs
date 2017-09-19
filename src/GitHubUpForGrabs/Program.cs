@@ -11,7 +11,7 @@ namespace GitHubUpForGrabs
     {
         private static Tuple<string, string, string>[] repositories = new[] {
             new Tuple<string, string, string>("dotnet", "coreclr", "up-for-grabs"),
-            new Tuple<string, string, string>("dotnet", "corefx", "up for grabs"),
+            new Tuple<string, string, string>("dotnet", "corefx", "up-for-grabs"),
             new Tuple<string, string, string>("aspnet", "mvc", "up-for-grabs"),
             new Tuple<string, string, string>("aspnet", "EntityFramework", "up-for-grabs"),
         };
@@ -26,7 +26,7 @@ namespace GitHubUpForGrabs
 
         private static async Task CallGitHub()
         {
-            GitHubClient client = CreateGitHubClient();            
+            GitHubClient client = CreateGitHubClient();
 
             List<Issue> allIssues = new List<Issue>();
 
