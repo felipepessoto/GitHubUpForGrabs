@@ -1,7 +1,7 @@
 ﻿using CsvHelper;
+using Microsoft.Extensions.Configuration;
 using Octokit;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -9,12 +9,7 @@ namespace GitHubUpForGrabs
 {
     class Program
     {
-        private static Tuple<string, string, string>[] repositories = new[] {
-            new Tuple<string, string, string>("dotnet", "coreclr", "up-for-grabs"),
-            new Tuple<string, string, string>("dotnet", "corefx", "up-for-grabs"),
-            new Tuple<string, string, string>("aspnet", "mvc", "up-for-grabs"),
-            new Tuple<string, string, string>("aspnet", "EntityFramework", "up-for-grabs"),
-        };
+        static GitHubUpForGrabsOptions options = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().Get<GitHubUpForGrabsOptions>();
 
         static void Main(string[] args)
         {
@@ -28,34 +23,25 @@ namespace GitHubUpForGrabs
         {
             GitHubClient client = CreateGitHubClient();
 
-            List<Issue> allIssues = new List<Issue>();
-
-            foreach (var repository in repositories)
+            foreach (var repository in options.GitHub.Repositories)
             {
-                RepositoryIssueRequest issueRequest = GenerateLabelsFilter(repository.Item3);
-                var issues = await client.Issue.GetAllForRepository(repository.Item1, repository.Item2, issueRequest);
-                allIssues.AddRange(issues);
+                RepositoryIssueRequest issueRequest = GenerateLabelsFilter(repository.Label);
+                var issues = await client.Issue.GetAllForRepository(repository.Owner, repository.Name, issueRequest);
 
-                Console.WriteLine($"{repository.Item1}/{repository.Item2} total: {issues.Count}");
-                Console.WriteLine();
+                Console.WriteLine($"{repository.Owner}/{repository.Name} total: {issues.Count}");
 
-                foreach (var issue in issues)
+                using (TextWriter textWriter = new StreamWriter($"{repository.Owner}_{repository.Name}.csv"))
                 {
-                    //Console.WriteLine($"Issue: {issue.Title}, Labels: {string.Join(", ", issue.Labels.Select(x => x.Name))}");
+                    var csv = new CsvWriter(textWriter);
+                    csv.WriteRecords(issues);
                 }
-            }
-
-            using (TextWriter textWriter = new StreamWriter("output.csv"))
-            {
-                var csv = new CsvWriter(textWriter);
-                csv.WriteRecords(allIssues);
             }
         }
 
         private static GitHubClient CreateGitHubClient()
         {
             var client = new GitHubClient(new ProductHeaderValue("GitHubUpForGrabs"));
-            client.Credentials = new Credentials("TOKEN");
+            client.Credentials = new Credentials(options.GitHub.PersonalAccessTokens);
             return client;
         }
 
